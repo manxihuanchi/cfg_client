@@ -1,0 +1,7 @@
+-------------------------------------------------------------------------------
+Test set: cho.carbon.CfgClientApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.332 s <<< FAILURE! - in cho.carbon.CfgClientApplicationTests
+cho.carbon.CfgClientApplicationTests  Time elapsed: 0.332 s  <<< ERROR!
+java.lang.IllegalStateException: Unable to find a @SpringBootConfiguration, you need to use @ContextConfiguration or @SpringBootTest(classes=...) with your test
+
