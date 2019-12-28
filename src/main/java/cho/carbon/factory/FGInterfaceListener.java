@@ -124,7 +124,7 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 		.append("public class "+clazzName+" {")
 		.append("}");
 		    
-		return JavaCompilerFactory.compilerJavaFile(packageName, clazzName, sb.toString().getBytes());
+		return JavaCompilerFactory.compilerJavaFile(packageName, clazzName, sb.toString().getBytes(), false, false);
 	}
 
 	/**
@@ -318,7 +318,7 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 		
 		
 		System.out.println(sb.toString());
-		return JavaCompilerFactory.compilerJavaFile(packageName, clazzName, sb.toString().getBytes());
+		return JavaCompilerFactory.compilerJavaFile(packageName, clazzName, sb.toString().getBytes(), false, false);
 	}
 
 	/**
@@ -414,7 +414,7 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 		sb.append(" }" + rt);
 		System.out.println("feign接口： " + sb.toString());
 		
-		return JavaCompilerFactory.compilerJavaFile(packageName, clazzName, sb.toString().getBytes());
+		return JavaCompilerFactory.compilerJavaFile(packageName, clazzName, sb.toString().getBytes(), false, false);
 	}
 
 	// 测试beanFactory 是否可用

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>cho.carbon</groupId>
 	<artifactId>cfg_client</artifactId>
-	<version>0.0.31</version>
+	<version>0.0.38</version>
 	<name>cfg_client</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>cho.carbon</groupId>
 			<artifactId>fgutil</artifactId>
-			<version>0.0.11</version>
+			<version>0.0.21</version>
 		</dependency>
 		
 		<dependency>
