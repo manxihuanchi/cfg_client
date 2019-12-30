@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeansException;
@@ -29,7 +31,10 @@ import cho.carbon.utils.JavaCompilerFactory;
 import cho.carbon.utils.MessageDTO;
 
 public class FGInterfaceListener  implements ApplicationContextAware, BeanFactoryAware {
+	
+	private static final Logger logger = LoggerFactory.getLogger(FGInterfaceListener.class);
 
+	
 	private ApplicationContext applicationContext;
 	
 	private BeanFactory beanFactory;
@@ -43,7 +48,7 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 		// 获取beanFactory
 		DefaultListableBeanFactory beanDefaultFactory = ((DefaultListableBeanFactory)beanFactory);
 		
-		System.out.println(message.toString());
+		logger.debug(message.toString());
 		
 		// 测试beanFactory 是否可用， 之后需要删除
 		testBeanFactory(beanDefaultFactory);
@@ -71,38 +76,37 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 			
 			String configName = buildConfigClazz.getName();
 			boolean containsFeign = beanDefaultFactory.containsBean(configName);
-			System.out.println("===========" + containsFeign);
+			logger.debug("===========" + containsFeign);
 			if (!containsFeign) {
 				BeanDefinition configBeanDefinition = new RootBeanDefinition(buildConfigClazz);
 				beanDefaultFactory.registerBeanDefinition(configName, configBeanDefinition);
-				System.out.println("注入了bean  ... configBeanDefinition");
+				logger.debug("注入了bean  ... configBeanDefinition");
 			}
 			
 			String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
-			System.out.println("----------------bean start -------------------");
+			logger.debug("----------------bean start -------------------");
 			
 			for (String name : beanDefinitionNames) {
-				System.out.println(name);
+				logger.debug(name);
 			}
 			
-			System.out.println("----------------bean end-------------------");
+			logger.debug("----------------bean end-------------------");
 			
 			Object bean = beanDefaultFactory.getBean(feignClient);
 			
 			// 创建fg
 			String fgBeanSimpleName = fgBean.getSimpleName();
-			String fgBeanLowerCase = fgBeanSimpleName.toLowerCase();
-			boolean containsBean = beanDefaultFactory.containsBean(fgBeanLowerCase);
-			System.out.println("===========" + containsBean);
+			boolean containsBean = beanDefaultFactory.containsBean(fgBeanSimpleName);
+			logger.debug("===========" + containsBean);
 			if (!containsBean) {
 				BeanDefinition fgBeanDefinition = new RootBeanDefinition(fgBean);
-				beanDefaultFactory.registerBeanDefinition(fgBeanLowerCase, fgBeanDefinition);
-				System.out.println("注入了bean  ... fgBeanDefinition");
+				beanDefaultFactory.registerBeanDefinition(fgBeanSimpleName, fgBeanDefinition);
+				logger.debug("注入了bean  ... fgBeanDefinition");
 			}
 //			
-			Object bean2 = beanDefaultFactory.getBean(fgBeanLowerCase);
+			Object bean2 = beanDefaultFactory.getBean(fgBeanSimpleName);
 //			
-			System.out.println(bean2);
+			logger.debug(fgBeanSimpleName + " : " + bean2);
 			
 		}
 		
@@ -317,7 +321,7 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 		sb.append("}" + rt);
 		
 		
-		System.out.println(sb.toString());
+		logger.debug(sb.toString());
 		return JavaCompilerFactory.compilerJavaFile(packageName, clazzName, sb.toString().getBytes(), false, false);
 	}
 
@@ -335,7 +339,7 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 		applicationName = applicationName.toUpperCase();
 		String clazzName =  fgCalzzNameUpperCase+ "FeignClientService";
 		
-		System.out.println("feign的名称 ： " + clazzName);
+		logger.debug("feign的名称 ： " + clazzName);
 		// 定义换行符
 		String rt = "\r\n";
 		StringBuffer sb  = new StringBuffer();
@@ -412,7 +416,7 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 		}
 		
 		sb.append(" }" + rt);
-		System.out.println("feign接口： " + sb.toString());
+		logger.debug("feign接口： " + sb.toString());
 		
 		return JavaCompilerFactory.compilerJavaFile(packageName, clazzName, sb.toString().getBytes(), false, false);
 	}
@@ -421,20 +425,20 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 	private void testBeanFactory(DefaultListableBeanFactory beanDefaultFactory) {
 		// 创建书籍
 		boolean containsBeanbook = beanDefaultFactory.containsBean("book");
-		System.out.println("===========" + containsBeanbook);
+		logger.debug("===========" + containsBeanbook);
 		if (!containsBeanbook) {
 			BeanDefinition people = new RootBeanDefinition(Book.class);
 			beanDefaultFactory.registerBeanDefinition("book", people);
-			System.out.println("注入了bean  ... book");
+			logger.debug("注入了bean  ... book");
 		}
 		
 		// 创建人口
 		boolean containsBean = beanDefaultFactory.containsBean("people");
-		System.out.println("===========" + containsBean);
+		logger.debug("===========" + containsBean);
 		if (!containsBean) {
 			BeanDefinition people = new RootBeanDefinition(People.class);
 			beanDefaultFactory.registerBeanDefinition("people", people);
-			System.out.println("注入了bean  ... people");
+			logger.debug("注入了bean  ... people");
 		}
 		
 		People bean = beanDefaultFactory.getBean(People.class);
@@ -451,7 +455,7 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 		private Book book;
 		
 		public People() {
-			System.out.println("people 创建了");
+			logger.debug("people 创建了");
 		}
 		private String name = "小明";
 
@@ -464,14 +468,14 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 		}
 		
 		public void showBook() {
-			System.out.println(this.book.getName());
+			logger.debug(this.book.getName());
 		}
 		
 	}
 	
 	class Book {
 		public Book() {
-			System.out.println("Book 创建了");
+			logger.debug("Book 创建了");
 		}
 		private String name = "历史书";
 		
