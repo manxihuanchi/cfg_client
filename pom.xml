@@ -16,7 +16,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<version.carbon-core>0.106</version.carbon-core>
+		<version.carbon-core>1.0.129-SNAPSHOT</version.carbon-core>
 	</properties>
 
 	<dependencies>

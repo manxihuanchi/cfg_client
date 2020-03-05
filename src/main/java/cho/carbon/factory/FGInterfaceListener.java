@@ -19,7 +19,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import cho.carbon.fuse.fg.CheckFuncGroup;
+import cho.carbon.context.fg.FuncGroupContext;
 import cho.carbon.fuse.fg.FetchFuncGroup;
 import cho.carbon.fuse.fg.FirstRoundImproveFuncGroup;
 import cho.carbon.fuse.fg.FuseCallBackFuncGroup;
@@ -27,6 +27,8 @@ import cho.carbon.fuse.fg.IdentityQueryFuncGroup;
 import cho.carbon.fuse.fg.QueryJunctionFuncGroup;
 import cho.carbon.fuse.fg.SecondRoundImproveFuncGroup;
 import cho.carbon.fuse.fg.ThirdRoundImproveFuncGroup;
+import cho.carbon.fuse.fg.ValidatorFGResult;
+import cho.carbon.fuse.fg.ValidatorFuncGroup;
 import cho.carbon.utils.JavaCompilerFactory;
 import cho.carbon.utils.MessageDTO;
 
@@ -154,8 +156,9 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 		sb.append("import org.springframework.beans.factory.annotation.Autowired;"+ rt);
 		sb.append("import cho.carbon.complexus.FGRecordComplexus;"+ rt);
 		sb.append("import cho.carbon.context.fg.FuncGroupContext;"+ rt);
-		sb.append("import cho.carbon.dto.CarbonParam;"+ rt);
-		sb.append("import cho.carbon.fuse.fg.CheckFGResult;"+ rt);
+		sb.append("import cho.carbon.dto.CarbonParam;"+ rt)
+		.append("import cho.carbon.fuse.fg.ValidatorFGResult;"  +rt)
+		.append("import cho.carbon.fuse.fg.ValidatorFuncGroup;"  +rt);
 		sb.append("import cho.carbon.fuse.fg.ConJunctionFGResult;"+ rt);
 		sb.append("import cho.carbon.fuse.fg.FGOSerializableFactory;"+ rt);
 		sb.append("import cho.carbon.fuse.fg.FetchFGResult;"+ rt);
@@ -184,22 +187,32 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 				
 				//getCriterions
 				javaCenter.append("@Override"  +rt )
-				.append("public Collection<ModelCriterion> getCriterions(String recordCode, FGRecordComplexus fGRecordComplexus) {" + rt)
+				.append("public Collection<ModelCriterion> getCriterions(FuncGroupContext context, String recordCode, FGRecordComplexus fGRecordComplexus) {" + rt)
 				.append("CarbonParam carbonParam = new CarbonParam();" + rt)
 				.append("carbonParam.setRecordCode(recordCode);" + rt)
 				.append("carbonParam.setfGRecordComplexus(fGRecordComplexus.serialize());" + rt)
 				.append("return FGOSerializableFactory.des2Criterions("+feignClientName+".getCriterions(carbonParam));" + rt)
 				.append("}" + rt);
-			} else if (CheckFuncGroup.class.equals(interClazz)) {
+			} else if (ValidatorFuncGroup.class.equals(interClazz)) {
 				flag = true;
-				// afterCheck
+				// afterValidate
 				javaCenter.append("@Override"  +rt)
-				.append("public CheckFGResult afterCheck(FuncGroupContext funcGroupContext, String recordCode, FGRecordComplexus fGRecordComplexus) {" + rt)
+				.append("public ValidatorFGResult afterValidate(FuncGroupContext funcGroupContext, String recordCode, FGRecordComplexus fGRecordComplexus) {" + rt)
 				.append("CarbonParam carbonParam = new CarbonParam();" + rt)
 				.append("carbonParam.setFuncGroupContext(funcGroupContext.serialize());" + rt)
 				.append("carbonParam.setRecordCode(recordCode);" + rt)
 				.append("carbonParam.setfGRecordComplexus(fGRecordComplexus.serialize());" + rt)
-				.append("return FGOSerializableFactory.des2CheckFGResult("+feignClientName+".afterCheck(carbonParam));" + rt)
+				.append("return FGOSerializableFactory.des2CheckFGResult("+feignClientName+".afterValidate(carbonParam));" + rt)
+				.append("}" + rt);
+				
+				//beforeValidate
+				javaCenter.append("@Override"  +rt)
+				.append("public ValidatorFGResult beforeValidate(FuncGroupContext funcGroupContext, String recordCode, FGRecordComplexus fGRecordComplexus) {" + rt)
+				.append("CarbonParam carbonParam = new CarbonParam();" + rt)
+				.append("carbonParam.setFuncGroupContext(funcGroupContext.serialize());" + rt)
+				.append("carbonParam.setRecordCode(recordCode);" + rt)
+				.append("carbonParam.setfGRecordComplexus(fGRecordComplexus.serialize());" + rt)
+				.append("return FGOSerializableFactory.des2CheckFGResult("+feignClientName+".beforeValidate(carbonParam));" + rt)
 				.append("}" + rt);
 				
 			} else if (ThirdRoundImproveFuncGroup.class.equals(interClazz)) {
@@ -363,11 +376,14 @@ public class FGInterfaceListener  implements ApplicationContextAware, BeanFactor
 				//getCriterions
 				sb.append(" @RequestMapping(value = \"/"+fgCalzzNameLowerCase+"/getCriterions\")" +rt)
 				.append(" public String getCriterions(@RequestBody CarbonParam carbonParam);" +rt);
-			} else if (CheckFuncGroup.class.equals(interClazz)) {
-				// afterCheck
-				sb.append(" @RequestMapping(value = \"/"+fgCalzzNameLowerCase+"/afterCheck\")" +rt)
+			} else if (ValidatorFuncGroup.class.equals(interClazz)) {
+				// afterValidate
+				sb.append(" @RequestMapping(value = \"/"+fgCalzzNameLowerCase+"/afterValidate\")" +rt)
 				.append(" public String afterCheck(@RequestBody CarbonParam carbonParam);" +rt);
 				
+				//beforeValidate
+				sb.append(" @RequestMapping(value = \"/"+fgCalzzNameLowerCase+"/beforeValidate\")" +rt)
+				.append(" public String afterCheck(@RequestBody CarbonParam carbonParam);" +rt);
 			} else if (ThirdRoundImproveFuncGroup.class.equals(interClazz)) {
 				// thirdImprove
 				sb.append(" @RequestMapping(value = \"/"+fgCalzzNameLowerCase+"/thirdImprove\")"+rt)
